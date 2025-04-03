@@ -1,0 +1,206 @@
+button 
+{
+    background-image: none;
+}
+
+#nav_bar{
+    background-color: white;
+    padding: 10px;
+}
+
+#left_side {
+    background-color: yellow;
+    border-radius: 50%;
+}
+
+#logo {
+    /* background-color: greenyellow; */
+    border-radius: 50%;
+}
+
+#middle_box {
+    /* background-color: rgba(180, 176, 176, 0.551); */
+    border-radius: 20px;
+}
+
+#home {
+    margin-left: 30px;
+    margin-right: 30px;
+    font-size: 20px;
+    font-weight: bold;
+}
+#products {
+    margin-left: 30px;
+    margin-right: 30px;
+    font-size: 20px;
+    font-weight: bold;
+}
+#about_us {
+    margin-left: 30px;
+    margin-right: 30px;
+    font-size: 20px;
+    font-weight: bold;
+}
+#contact_us {
+    margin-left: 30px;
+    margin-right: 30px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+
+#loginButton {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#contentBox {
+    margin: 0px;
+    padding: 0px;
+}
+
+#greetingText {
+    font-size: 60px;
+    color: white;
+    font-weight: bolder;
+    background-color: crimson;
+}
+
+#addContainer {
+    margin-top: 10px;
+}
+
+#FeaturedText {
+    /* margin-left: 10px; */
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+#featuredContainer {
+    margin-top: 10px;
+}
+
+#label {
+    color: white;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+#newItem_text {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#image_right_part {
+    background-color: rgb(225, 0, 255);
+    border-radius: 30px;
+}
+
+#input_text {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+#defaultImage {
+    border-radius: 30px;
+}
+
+#input_container {
+    background-color: burlywood;
+}
+
+#entryBox {
+    font-size: 20px;
+}
+
+#checkBox {
+    margin-left: 5px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#try {
+    /* background-color: purple; */
+    border: 2px solid black;
+}
+
+#try1 {
+    background-color: red;
+}
+
+#submitButton {
+    font-size: 25px;
+    font-weight: bold;
+    background-color: rgb(2, 255, 2);
+}
+
+#newBox {
+    font-size: 20px;
+    /* background-color: rgb(169, 199, 230); */
+    border: 3px solid black;
+    /* border-color: black;
+    border-width: 3px; */
+    font-weight: bold;
+    border-radius: 30px;
+}
+
+#newItemImage {
+    border-radius: 20px;
+    border: 3px solid black;
+}
+#newItemImage2 {
+    border-radius: 20px;
+    border: 3px solid rgb(233, 17, 17);
+    /* background-color: aqua; */
+}
+
+#productContainer 
+{
+    background-color: rgb(223, 223, 223);
+    border-radius: 30px;
+}
+
+#categoryBox {
+    border-radius: 30px;
+
+}
+
+#categoryContainerTop
+{
+    background-color: aqua;
+    margin-top: 10px;
+    border-radius: 30px;
+}
+
+#categoryContainerBottom
+{
+    background-color: burlywood;
+    border-radius: 30px;
+}
+
+#addCategory
+{
+    border-radius: 40px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#optionButton:hover
+{
+    background-color: lightgreen;
+    background-image: none;
+    color: white;
+}
+
+#deleteButton:hover
+{
+    background-color: red;
+    background-image: none;
+    color: white;
+}
+
+#boxWithBorder
+{
+    border: 2px solid red;
+}
