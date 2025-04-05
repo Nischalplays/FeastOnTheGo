@@ -7,6 +7,7 @@
 
 GtkWidget *categoryTopContainer;
 int categoryEmpty = TRUE;
+GtkWidget *categoryContent;
 
 void on_clicked(GtkWidget *button, gpointer user_data)
 {
@@ -20,7 +21,7 @@ void load_category(gpointer boxToLoad)
 {
     for (int i = 0; i < categoryCount; i++)
     {
-        GtkWidget *newBox = createCategoryBox(GTK_WIDGET(boxToLoad), LOAD, categorys[i].name);
+        GtkWidget *newBox = createCategoryBox(GTK_WIDGET(boxToLoad), LOAD, categorys[i].name, i);
         gtk_box_pack_start(GTK_BOX(boxToLoad), newBox, FALSE, FALSE, 0);
     }
 }
@@ -74,14 +75,15 @@ GtkWidget *createProductPage()
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(categoryBox), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start(GTK_BOX(categoryBottomContainer), categoryBox, TRUE, TRUE, 0);
 
-    GtkWidget *categoryContent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    categoryContent = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(categoryBox), categoryContent);
 
     if(!categoryEmpty)
     {
         for(int i = 0; i < categoryCount; i++)
         {
-            GtkWidget *vbox = createCategoryButton(categoryBox, &categorys[i]);
+            char *name = strdup(categorys[i].name);
+            GtkWidget *vbox = createCategoryButton(categoryBox, name);
             gtk_box_pack_start(GTK_BOX(categoryContent), vbox, FALSE, FALSE, 0);
         }
     }
@@ -105,6 +107,11 @@ GtkWidget *createProductPage()
     if(!categoryEmpty)
     {
         load_category(contentBox);
+    }
+
+    if(!dataBaseEmpty)
+    {
+        loadItemBox(product);
     }
 
     gtk_box_pack_end(GTK_BOX(productPageContainer), foodItemContainer, FALSE, FALSE, 0);

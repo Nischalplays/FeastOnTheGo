@@ -7,5 +7,6 @@ extern GtkWidget *mainWindow;
 extern int WIN_WIDTH;
 extern int WIN_HEIGHT;
 extern GtkWidget *emptyBox;
+extern int dataBaseEmpty;
 
 #endif // !MAIN_H

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-APP_NAME="bin/main"  # Name of the output binary
+APP_NAME="bin/FeastOnTheGo"  # Name of the output binary
 SOURCE_FILES="src/main.c src/dataManager.c src/itemManager.c src/widgetManager.c src/products.c src/structManager.c"  # List of source files
 INCLUDE_DIRS="-I./includes"  # Add xlsxwriter header path
 LIBRARIES="-L./libs -L'C:/msys64/ucrt64/lib' -lsqlite3"  # Add xlsxwriter library if it's a compiled lib

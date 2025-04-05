@@ -13,7 +13,7 @@
 
 int WIN_WIDTH = 1200;
 int WIN_HEIGHT = 800;
-int empty = FALSE;
+int dataBaseEmpty = FALSE;
 GtkWidget *emptyBox = NULL;
 
 GtkWidget *mainWindow;
@@ -51,7 +51,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     {
         printf("Table is empty.\n");
         printf("No Loading Required.\n");
-        empty = TRUE;
+        dataBaseEmpty = TRUE;
     }
     else if(isTableEmpty(dataFilePath, "menu") == 0)
     {
@@ -62,7 +62,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     else if(isTableEmpty(dataFilePath, "menu") == -1)
     {
         printf("Error occured.\n");
-        empty = TRUE;
+        dataBaseEmpty = TRUE;
     }
 
     // printMenuData(product, productCount);
@@ -250,7 +250,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     gtk_widget_set_size_request(GTK_WIDGET(TrendingBox), WIN_WIDTH, 300);
     gtk_widget_set_name(TrendingBox, "trendingBox");
 
-    if (empty == TRUE)
+    if (dataBaseEmpty == TRUE)
     {
         emptyBox = createBox_with_text(300, -1, "No Items Available Currently.", GTK_ORIENTATION_VERTICAL, "newBox"); 
         gtk_box_pack_start(GTK_BOX(TrendingBox), emptyBox, FALSE, FALSE, 0);
@@ -259,7 +259,7 @@ static void activate(GtkApplication *app, gpointer user_data)
     else
     {
         emptyBox = NULL;
-        loadItemBox(TrendingBox, product);
+        // loadItemBox(TrendingBox, product);
     }
 
 

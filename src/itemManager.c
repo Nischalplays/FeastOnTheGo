@@ -171,6 +171,8 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     combo = gtk_combo_box_text_new();
     gtk_widget_set_name(GTK_WIDGET(combo), "entryBox");
 
+    categoryOption(GTK_COMBO_BOX_TEXT(combo));
+
     gtk_grid_attach(GTK_GRID(inputGrid), nameText, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(inputGrid), nameEntry, 1, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(inputGrid), priceText, 0, 1, 1, 1);
@@ -198,6 +200,7 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     item.nameField = nameEntry;
     item.priceField = priceEntry;
     item.discountField = discountEntry;
+    item.comboBox = combo;
 
     addButton = gtk_button_new_with_label("Add Item");
     gtk_button_set_relief(GTK_BUTTON(addButton), GTK_RELIEF_NONE);
@@ -209,7 +212,7 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     gtk_widget_show_all(GTK_WIDGET(new_Item_Window));
 }
 
-void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata, gpointer imageholder)
+void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata)
 {
     NewItem *data = (NewItem *)userdata;
 
@@ -380,6 +383,7 @@ void on_submit(GtkButton *current_button, gpointer user_data)
             gtk_widget_destroy(GTK_WIDGET(emptyBox));
             emptyBox = NULL;
         }
+        data->category = strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->comboBox)));
         GtkWidget *vbox = create_box(data);
         gtk_box_pack_start(GTK_BOX(data->destinationBox), vbox, FALSE, FALSE, 0);
 
@@ -398,12 +402,12 @@ void on_submit(GtkButton *current_button, gpointer user_data)
     if (success)
     {
 
-        // addProduct( , data->imagePath, data->name, data->price, data->discount);
+        // addProduct(NULL, data->imagePath, data->name, data->price, data->discount);
         // product[productCount].ImageFile = strdup(data->imagePath);
         // product[productCount].name = strdup(data->name);
         // product[productCount].price = data->price;
         // product[productCount].discount = data->discount;
-        // saveMenuData(data, dataFilePath);
+        saveMenuData(data, dataFilePath);
 
         // data->imagePath = NULL;
         // gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(data->imageEntry), "");
@@ -518,11 +522,12 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     return itemBox;
 }
 
-void loadItemBox(GtkWidget *boxToLoad, Products *product)
+void loadItemBox(Products *product)
 {
     int i;
     for (i = 0; i < productCount; i++)
     {
+        GtkWidget *boxToLoad = searchCategoryContainer(product->category);
         GtkWidget *vbox = load_box(boxToLoad, &product[i]);
         gtk_box_pack_start(GTK_BOX(boxToLoad), vbox, FALSE, FALSE, 0);
     }

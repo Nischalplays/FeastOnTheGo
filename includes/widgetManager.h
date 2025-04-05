@@ -26,8 +26,11 @@ GtkWidget *createRoundedImage(const char *filepath, int width, int height, int r
 gboolean onHover (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 gboolean onLeave (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 void deleteItemWidget(GtkWidget *widget, gpointer userdata);
-GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const char *CategoryName);
+GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const char *CategoryName, int index);
 void onAddCategory(GtkWidget *button, gpointer user_data);
-GtkWidget *createCategoryButton(GtkWidget *destinationToCreate, gpointer user_data);
+GtkWidget *createCategoryButton(GtkWidget *destinationToCreate, char *categoryName);
+void categoryOption(GtkComboBoxText *comboBox);
+void insertIntoCategoryContainer(char *name);
+GtkWidget *searchCategoryContainer(char *categoryName);
 
 #endif // !WIDGETMANAGER

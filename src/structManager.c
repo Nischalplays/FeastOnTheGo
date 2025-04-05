@@ -10,11 +10,13 @@ AllCategory *categorys = NULL;
 int categoryCapacity = 0;
 int categoryCount = 0;
 
+CategoryBox *box = NULL;
+
 NewItem item;
 NewCategory category;
 Delete *deleteItem;
 
-void addProduct(int id, const char *ImagePath,const char *name, int price, int discount)
+void addProduct(int id, const char *ImagePath,const char *name, int price, int discount, const char *category)
 {
     if(productCount == productCapacity)
     {
@@ -32,6 +34,7 @@ void addProduct(int id, const char *ImagePath,const char *name, int price, int d
     product[productCount].name = strdup(name);
     product[productCount].price = price;
     product[productCount].discount = discount;
+    product[productCount].category = strdup(category);
     productCount++;
 }
 
@@ -47,6 +50,7 @@ void addCategory(int id, char *name)
     {
         categoryCapacity = (categoryCount == 0) ? 2 : categoryCapacity * 2;
         categorys = realloc(categorys, categoryCapacity * sizeof(AllCategory));
+        box = realloc(box, categoryCapacity * sizeof(AllCategory));
         if(!categorys)
         {
             printf("memory allocation for category failed.\n");
@@ -74,6 +78,16 @@ void printCategory()
     for(int i = 0; i < categoryCount; i++)
     {
         printf("Id: %d | Name: %s.\n", categorys[i].id, categorys[i].name);
+    }
+}
+
+void printCategoryBox()
+{
+    printf("Category box: \n");
+    for(int i = 0; i < categoryCount; i++)
+    {
+        const char *categoryName = gtk_widget_get_name(GTK_WIDGET(box[i].categoryBox));
+        printf("Category Box name: %s\n", categoryName);
     }
 }
 

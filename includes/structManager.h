@@ -36,6 +36,7 @@ typedef struct
     GtkWidget *addItemWindow;
     GtkWidget *imageEntry;
     GtkWidget *defaultImageBox;
+    GtkWidget *comboBox;
 } NewItem;
 
 typedef struct 
@@ -50,6 +51,11 @@ typedef struct
     char *name;
 } AllCategory;
 
+typedef struct 
+{
+    GtkWidget *categoryBox;
+} CategoryBox;
+
 extern Delete *deleteItem;
 
 extern Products *product;
@@ -60,12 +66,15 @@ extern AllCategory *categorys;
 extern int categoryCapacity;
 extern int categoryCount;
 
+extern CategoryBox *box;
+
 extern NewItem item;
 extern NewCategory category;
 
-void addProduct(int id, const char *ImagePath, const char *name, int price, int discount);
+void addProduct(int id, const char *ImagePath, const char *name, int price, int discount, const char *category);
 void addCategory(int id, char *name);
 void PrintProduct();
 void printCategory();
+void printCategoryBox();
 
 #endif

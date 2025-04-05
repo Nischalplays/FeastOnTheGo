@@ -21,14 +21,13 @@ int createDataBase(const char *filename)
         return rc;
     }
 
-    printf("Opened database successfully.\n");
-
     const char *sqlCreateMenu = "CREATE TABLE IF NOT EXISTS menu ("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                       "name TEXT NOT NULL, "
                       "price REAL NOT NULL, "
                       "discount INT NOT NULL, "
-                      "image_path TEXT NOT NULL);";
+                      "image_path TEXT NOT NULL,"
+                      "category TEXT NOT NULL);";
                 
     const char *sqlCreateCategory = "CREATE TABLE IF NOT EXISTS category ("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -46,7 +45,6 @@ int createDataBase(const char *filename)
         sqlite3_free(errMsg);
     }
 
-    printf("Table created successfully.\n");
     sqlite3_close(db);
     return SQLITE_OK;
 }
@@ -106,7 +104,6 @@ int isTableEmpty(const char *filename,const char *tableName)
 int saveMenuData(NewItem *data, const char *filename)
 {
     sqlite3 *database;
-    g_print("filename in save%s\n", filename);
     int rc = sqlite3_open(filename, &database);
 
     if (rc != SQLITE_OK)
@@ -118,7 +115,7 @@ int saveMenuData(NewItem *data, const char *filename)
     createDataBase(filename);
 
     // Using prepared statement instead of snprintf() to prevent SQL injection
-    const char *sql = "INSERT INTO menu (name, price, discount, image_path) VALUES (?, ?, ?, ?)";
+    const char *sql = "INSERT INTO menu (name, price, discount, image_path, category) VALUES (?, ?, ?, ?, ?)";
     sqlite3_stmt *stmt;
 
     rc = sqlite3_prepare_v2(database, sql, -1, &stmt, NULL);
@@ -129,14 +126,15 @@ int saveMenuData(NewItem *data, const char *filename)
         return rc;
     }
 
-    printf("Inserting: %s | %.2f | %d | %s\n", 
+    printf("Inserting: %s | %.2f | %d | %s | %s\n", 
         data->name, data->price, 
-        data->discount, data->imagePath);
+        data->discount, data->imagePath, data->category);
 
     sqlite3_bind_text(stmt, 1, data->name, -1, SQLITE_STATIC);
     sqlite3_bind_double(stmt, 2, data->price);
     sqlite3_bind_int(stmt, 3, data->discount);
     sqlite3_bind_text(stmt, 4, data->imagePath, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, data->category, -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE)
@@ -213,7 +211,7 @@ int loadMenuData(const char *filename)
 
     createDataBase(filename);
 
-    char *sql = "SELECT id, name, price, discount, image_path FROM menu;";
+    char *sql = "SELECT id, name, price, discount, image_path, category FROM menu;";
 
     rc = sqlite3_prepare_v2(database, sql, -1, &stmt, 0);
     if (rc != SQLITE_OK)
@@ -232,8 +230,9 @@ int loadMenuData(const char *filename)
         int price = sqlite3_column_double(stmt, 2);
         int discount = sqlite3_column_int(stmt, 3);
         const char *image_path = (const char *)sqlite3_column_text(stmt, 4);
+        const char *category = (const char *)sqlite3_column_text(stmt, 5);
 
-        addProduct(id, image_path, name, price, discount);
+        addProduct(id, image_path, name, price, discount, category);
 
         count++;
     }

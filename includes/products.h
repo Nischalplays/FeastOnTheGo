@@ -9,5 +9,7 @@ GtkWidget *createProductPage();
 // void get_category(GtkWidget *comboBox, Category *category);
 
 extern GtkWidget *categoryTopContainer;
+extern int categoryEmpty;
+extern GtkWidget *categoryContent;
 
 #endif // !PRODUCTS_H

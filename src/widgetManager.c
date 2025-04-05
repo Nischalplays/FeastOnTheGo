@@ -199,11 +199,10 @@ void deleteItemWidget(GtkWidget *widget, gpointer userdata)
     }
 }
 
-GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const char *CategoryName)
+GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const char *CategoryName, int index)
 {
     const char *categoryNameText =  NULL;
     
-    printf("works until here");
     if(type == SAVE)
     {
         categoryNameText = strdup(category.name);
@@ -213,13 +212,17 @@ GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const cha
         categoryNameText = strdup(CategoryName);
     }
 
-
     GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(GTK_WIDGET(container), -1, 350);
-    gtk_widget_set_name(container, "categoryBox");
+    gtk_widget_set_name(container, categoryNameText);
+
+
+    GtkWidget *content = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name(content, "categoryBox");
+    gtk_box_pack_start(GTK_BOX(container), content, FALSE, FALSE, 0);
     
     GtkWidget * topBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_box_pack_start(GTK_BOX(container), topBox, TRUE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(content), topBox, TRUE, FALSE, 0);
     gtk_widget_set_size_request(topBox, -1, 50);
     gtk_widget_set_name(topBox, "try");
 
@@ -228,11 +231,11 @@ GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const cha
     gtk_widget_set_name(categoryName, "FeaturedText");
 
     GtkWidget *CategoryContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_box_pack_start(GTK_BOX(container), CategoryContainer, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(content), CategoryContainer, FALSE, FALSE, 0);
     gtk_widget_set_size_request(CategoryContainer, -1, 300);
-    gtk_widget_set_name(CategoryContainer, "boxWithBorder");
+    gtk_widget_set_name(CategoryContainer, "CategoryContentBox");
 
-
+    box[index].categoryBox = container;
     return container;
 }
 
@@ -248,24 +251,89 @@ void onAddCategory(GtkWidget *button, gpointer user_data)
         if(warningManager(mainWindow, GTK_BUTTONS_YES_NO, GTK_MESSAGE_WARNING, warningText) == 1)
         {
             category.name = strdup(entryData);
+            insertIntoCategoryContainer(strdup(category.name));
             saveCategoryData(&category, dataFilePath);
-            // insertIntoCategoryContainer()
+            addCategory(0, strdup(category.name));
         }
     }
 }
 
-GtkWidget *createCategoryButton(GtkWidget *destinationToCreate, gpointer user_data)
+GtkWidget *createCategoryButton(GtkWidget *destinationToCreate, char *categoryName)
 {
-    AllCategory *categoryToLoad = (AllCategory *)user_data;
+    // AllCategory *categoryToLoad = (AllCategory *)user_data;
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_size_request(box, -1, 40);
 
-    GtkWidget *button = gtk_button_new_with_label((const char *)categoryToLoad->name);
+    GtkWidget *button = gtk_button_new_with_label((const char *)categoryName);
     gtk_widget_set_name(button, "categoryButton");
     gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 
     gtk_box_pack_start(GTK_BOX(box), button, FALSE, FALSE, 0);
 
     return box;
+}
+
+void insertIntoCategoryContainer(char *name)
+{
+    g_print("inserting new button");
+    GtkWidget *button = createCategoryButton(NULL, name);
+    gtk_box_pack_start(GTK_BOX(categoryContent), button, FALSE, FALSE, 0);
+    gtk_widget_show_all(button);
+}
+
+void categoryOption(GtkComboBoxText *comboBox)
+{
+    if(!categoryEmpty)
+    {
+        for(int i =0; i < categoryCount; i++)
+        {
+            gtk_combo_box_text_append(comboBox, NULL, categorys[i].name);
+        }
+        gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), 0);
+    }
+}
+
+GtkWidget *get_widget_child_by_name(GtkWidget *container, const char *nameToFind)
+{
+    GList *childern = gtk_container_get_children(GTK_CONTAINER(container));
+
+    for(GList *list = childern; list != NULL;list = list->next)
+    {
+        GtkWidget *child = GTK_WIDGET(list->data);
+        const char *widgetName = gtk_widget_get_name(child);
+        if(widgetName && g_strcmp0(nameToFind, widgetName) == 0)
+        {
+            g_list_free(childern);
+            return child;
+        }
+
+        if(GTK_IS_CONTAINER(child))
+        {
+            GtkWidget *categoryContainer = get_widget_child_by_name(child, nameToFind);
+            if(categoryContainer)
+            {
+                g_list_free(childern);
+                return categoryContainer;
+            }
+        }
+    }
+    printf("failed to find the child");
+    g_list_free(childern);
+    return NULL;
+}
+
+GtkWidget *searchCategoryContainer(char *categoryName)
+{
+    for(int i = 0; i < categoryCount; i++)
+    {
+        const char *name = gtk_widget_get_name(box[i].categoryBox);
+        if (strcmp(name, categoryName) == 0)
+        {
+            printf("found the widget\n");
+            GtkWidget *container = get_widget_child_by_name(GTK_WIDGET(box[i].categoryBox), "CategoryContentBox");
+            return container;
+        }
+    }
+    printf("Could not find a widget with name: %s\n", categoryName);
 }

@@ -112,6 +112,7 @@ button
 
 #entryBox {
     font-size: 20px;
+    background-color: white;
 }
 
 #checkBox {
@@ -200,7 +201,7 @@ button
     color: white;
 }
 
-#boxWithBorder
+#CategoryContentBox
 {
     border: 2px solid red;
 }
