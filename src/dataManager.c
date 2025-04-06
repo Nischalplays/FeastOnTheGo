@@ -321,8 +321,8 @@ void printMenuData(Products *product, int size)
     int i;
     for (i = 0; i < size; i++)
     {
-        printf("Id: %d | Name: %s | Price: %d | Discount: %d | Image Path: %s.\n", product[i].id, product[i].name,
-               product[i].price, product[i].discount, product[i].ImageFile);
+        printf("Id: %d | Name: %s | Price: %d | Discount: %d | Image Path: %s | Category: %s.\n", product[i].id, product[i].name,
+               product[i].price, product[i].discount, product[i].ImageFile, product[i].category);
     }
     printf("finished printing menu data. count: %d\n", i);
 }

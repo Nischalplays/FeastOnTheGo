@@ -389,7 +389,6 @@ void on_submit(GtkButton *current_button, gpointer user_data)
 
         gtk_widget_show_all(GTK_WIDGET(vbox));
         success = 1;
-    
     }
     else
     {
@@ -398,6 +397,7 @@ void on_submit(GtkButton *current_button, gpointer user_data)
             warningManager(data->addItemWindow, GTK_BUTTONS_OK, GTK_MESSAGE_ERROR,"Please fill all the details");
         }
     }
+    printf("current category: %s\n", data->category);
 
     if (success)
     {
@@ -527,8 +527,11 @@ void loadItemBox(Products *product)
     int i;
     for (i = 0; i < productCount; i++)
     {
-        GtkWidget *boxToLoad = searchCategoryContainer(product->category);
+        GtkWidget *boxToLoad = searchCategoryContainer(product[i].category);
         GtkWidget *vbox = load_box(boxToLoad, &product[i]);
-        gtk_box_pack_start(GTK_BOX(boxToLoad), vbox, FALSE, FALSE, 0);
+        if(boxToLoad)
+        {
+            gtk_box_pack_start(GTK_BOX(boxToLoad), vbox, FALSE, FALSE, 0);
+        }
     }
 }
