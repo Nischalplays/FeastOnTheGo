@@ -1,19 +1,5 @@
 {
     "files.associations": {
-        "gtk.h": "c",
-        "gtkaccessible.h": "c",
-        "gtkaccelmap.h": "c",
-        "stdio.h": "c",
-        "datamanager.h": "c",
-        "main.h": "c",
-        "stdlib.h": "c",
-        "sqlite3.h": "c",
-        "itemmanager.h": "c",
-        "windows.h": "c",
-        "products.h": "c",
-        "widgetmanager.h": "c",
-        "structmanager.h": "c",
-        "typeinfo": "c"
-    },
-    "C_Cpp.errorSquiggles": "disabled",
+        "gtk.h": "c"
+    }
 }

@@ -5,12 +5,6 @@
 #include "products.h"
 #include "structManager.h"
 
-typedef enum
-{
-    LOAD,
-    SAVE
-} WidgetType;
-
 typedef struct 
 {
     int response;

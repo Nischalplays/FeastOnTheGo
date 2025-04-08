@@ -199,15 +199,15 @@ void deleteItemWidget(GtkWidget *widget, gpointer userdata)
     }
 }
 
-GtkWidget *createCategoryBox(GtkWidget *destToCreate, WidgetType type, const char *CategoryName, int index)
+GtkWidget *createCategoryBox(GtkWidget *destToCreate, DataAction action, const char *CategoryName, int index)
 {
     const char *categoryNameText =  NULL;
     
-    if(type == SAVE)
+    if(action == ACTION_SAVE)
     {
         categoryNameText = strdup(category.name);
     }
-    else if(type == LOAD)
+    else if(action == ACTION_LOAD)
     {
         categoryNameText = strdup(CategoryName);
     }

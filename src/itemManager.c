@@ -230,9 +230,34 @@ void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata)
     g_free(filepath);
 }
 
-GtkWidget *create_box(gpointer user_data)
+GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *BoxToLoad)
 {
+
+    char *imagepath = NULL;
+    char *name = NULL;
+    char *category = NULL;
+    int price = 0;
+    int discount = 0;
+
     NewItem *itemdata = (NewItem *)user_data;
+    if(action == ACTION_SAVE)
+    {
+        imagepath = strdup(itemdata->imagePath);
+        name = strdup(itemdata->name);
+        category = strdup(itemdata->category);
+        price = itemdata->price;
+        discount = itemdata->discount;
+
+    }
+    else if(action == ACTION_LOAD)
+    {
+        imagepath = strdup(product->ImageFile);
+        name = strdup(product->name);
+        category = strdup(product->category);
+        price = product->price;
+        discount = product->discount;
+    }
+
 
     deleteItem = malloc(sizeof(Delete));
     if(!deleteItem)
@@ -240,7 +265,7 @@ GtkWidget *create_box(gpointer user_data)
         printf("failed allocating memory");
         return NULL;
     }
-    const char *destinationBoxNam = gtk_widget_get_name(GTK_WIDGET(itemdata->destinationBox));
+    // const char *destinationBoxNam = gtk_widget_get_name(GTK_WIDGET(itemdata->destinationBox));
 
     
 
@@ -268,13 +293,13 @@ GtkWidget *create_box(gpointer user_data)
     gtk_widget_set_name(GTK_WIDGET(imageHolder), "newItemImage2");
     gtk_widget_set_halign(GTK_WIDGET(imageHolder), GTK_ALIGN_CENTER);
     
-    GtkWidget *itemImage = createRoundedImage(itemdata->imagePath, 200, 200, 20);
+    GtkWidget *itemImage = createRoundedImage(imagepath, 200, 200, 20);
     
-    char *itemNameText = g_strdup_printf("Name: %s.", itemdata->name);
+    char *itemNameText = g_strdup_printf("Name: %s.", name);
     GtkWidget *itemName = gtk_label_new(itemNameText);
     g_free(itemNameText);
     
-    char *itemPriceText = g_strdup_printf("Price: %d.", itemdata->price);
+    char *itemPriceText = g_strdup_printf("Price: %d.", price);
     GtkWidget *itemPrice = gtk_label_new(itemPriceText);
     g_free(itemPriceText);
     
@@ -287,43 +312,35 @@ GtkWidget *create_box(gpointer user_data)
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
-    
-    GtkWidget *emptyGrid = gtk_label_new("");
-    gtk_widget_set_size_request(GTK_WIDGET(emptyGrid), 75, -1);
-    GtkWidget *emptyGrid1 = gtk_label_new("");
-    gtk_widget_set_size_request(GTK_WIDGET(emptyGrid1), 75, -1);
-    GtkWidget *emptyGrid2 = gtk_label_new("");
-    gtk_widget_set_size_request(GTK_WIDGET(emptyGrid2), 75, -1);
-    GtkWidget *emptyGrid3 = gtk_label_new("");
-    gtk_widget_set_size_request(GTK_WIDGET(emptyGrid3), 75, -1);
-    
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid1), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid2), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid3), "try");
 
-    printf("Destination Box: %s |Image Path: %s |food name: %s | price: %d | dis: %d \n",destinationBoxNam, itemdata->imagePath, itemdata->name, itemdata->price, itemdata->discount);
-    
     // deleteItem->id = product->id;
     deleteItem->box = itemBox; 
     deleteItem->products = product;
     deleteItem->filename = dataFilePath;
-    deleteItem->boxContainer = itemdata->destinationBox;
+    deleteItem->boxContainer = boxToLoad;
     
     
     GtkWidget *addToCartButton = gtk_button_new_with_label("Add To Cart");
     gtk_widget_set_name(GTK_WIDGET(addToCartButton), "optionButton");
+    gtk_widget_set_margin_top(addToCartButton, 10);
+    gtk_widget_set_margin_bottom(addToCartButton, 10);
+    gtk_widget_set_hexpand(addToCartButton, TRUE);
+    gtk_widget_set_halign(addToCartButton, GTK_ALIGN_CENTER);
+
+    GtkWidget *editMenButton = gtk_button_new_with_label("Edit");
+    gtk_widget_set_name(editMenButton, "editButton");
+    gtk_widget_set_hexpand(editMenButton, TRUE);
+    gtk_widget_set_halign(editMenButton, GTK_ALIGN_CENTER);
+
     GtkWidget *deleteItemButton = gtk_button_new_with_label("Delete");
     gtk_widget_set_name(GTK_WIDGET(deleteItemButton), "deleteButton");
+    gtk_widget_set_hexpand(deleteItemButton, TRUE);
+    gtk_widget_set_halign(deleteItemButton, GTK_ALIGN_CENTER);
     g_signal_connect(deleteItemButton, "clicked", G_CALLBACK(deleteItemWidget), deleteItem);
     
-    gtk_grid_attach(GTK_GRID(grid), emptyGrid, 0, 0, 3, 1);
-    gtk_grid_attach(GTK_GRID(grid), emptyGrid1, 0, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), addToCartButton, 1, 1, 1, 1);
-    gtk_widget_set_size_request(GTK_WIDGET(addToCartButton), 80, 5);
-    gtk_grid_attach(GTK_GRID(grid), emptyGrid2, 0, 2, 3, 1);
-    gtk_grid_attach(GTK_GRID(grid), emptyGrid3, 0, 3, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), deleteItemButton, 1, 3, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), addToCartButton, 1, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), editMenButton, 1, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), deleteItemButton, 1, 2, 1, 1);
     
     gtk_box_pack_start(GTK_BOX(optionContainer), grid, FALSE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(grid), 300, 300);
@@ -384,7 +401,7 @@ void on_submit(GtkButton *current_button, gpointer user_data)
             emptyBox = NULL;
         }
         data->category = strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->comboBox)));
-        GtkWidget *vbox = create_box(data);
+        GtkWidget *vbox = create_box(data, ACTION_SAVE);
         gtk_box_pack_start(GTK_BOX(data->destinationBox), vbox, FALSE, FALSE, 0);
 
         gtk_widget_show_all(GTK_WIDGET(vbox));

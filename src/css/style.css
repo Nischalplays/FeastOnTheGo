@@ -194,6 +194,12 @@ button
     color: white;
 }
 
+#editButton:hover
+{
+    background-color: lightgreen;
+    color:white;
+}
+
 #deleteButton:hover
 {
     background-color: red;

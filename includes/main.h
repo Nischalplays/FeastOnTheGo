@@ -3,6 +3,12 @@
 
 #include <gtk/gtk.h>
 
+typedef enum
+{
+    ACTION_SAVE,
+    ACTION_LOAD
+} DataAction;
+
 extern GtkWidget *mainWindow;
 extern int WIN_WIDTH;
 extern int WIN_HEIGHT;
