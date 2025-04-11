@@ -230,7 +230,7 @@ void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata)
     g_free(filepath);
 }
 
-GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *BoxToLoad)
+GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoad)
 {
 
     char *imagepath = NULL;
@@ -401,7 +401,9 @@ void on_submit(GtkButton *current_button, gpointer user_data)
             emptyBox = NULL;
         }
         data->category = strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->comboBox)));
-        GtkWidget *vbox = create_box(data, ACTION_SAVE);
+
+        GtkWidget *boxToLoad = searchCategoryContainer(data->category);
+        GtkWidget *vbox = create_box(data, ACTION_SAVE, boxToLoad);
         gtk_box_pack_start(GTK_BOX(data->destinationBox), vbox, FALSE, FALSE, 0);
 
         gtk_widget_show_all(GTK_WIDGET(vbox));
@@ -545,7 +547,7 @@ void loadItemBox(Products *product)
     for (i = 0; i < productCount; i++)
     {
         GtkWidget *boxToLoad = searchCategoryContainer(product[i].category);
-        GtkWidget *vbox = load_box(boxToLoad, &product[i]);
+        GtkWidget *vbox = create_box(&product[i], ACTION_LOAD, boxToLoad);
         if(boxToLoad)
         {
             gtk_box_pack_start(GTK_BOX(boxToLoad), vbox, FALSE, FALSE, 0);

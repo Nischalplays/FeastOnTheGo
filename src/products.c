@@ -21,7 +21,7 @@ void load_category(gpointer boxToLoad)
 {
     for (int i = 0; i < categoryCount; i++)
     {
-        GtkWidget *newBox = createCategoryBox(GTK_WIDGET(boxToLoad), LOAD, categorys[i].name, i);
+        GtkWidget *newBox = createCategoryBox(GTK_WIDGET(boxToLoad), ACTION_LOAD, categorys[i].name, i);
         gtk_box_pack_start(GTK_BOX(boxToLoad), newBox, FALSE, FALSE, 0);
     }
 }
