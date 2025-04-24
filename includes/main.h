@@ -6,7 +6,8 @@
 typedef enum
 {
     ACTION_SAVE,
-    ACTION_LOAD
+    ACTION_LOAD,
+    ACTION_UPDATE
 } DataAction;
 
 extern GtkWidget *mainWindow;

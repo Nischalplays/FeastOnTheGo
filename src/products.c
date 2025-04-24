@@ -31,7 +31,6 @@ GtkWidget *createProductPage()
     if(isTableEmpty(dataFilePath, "category") == 0)
     {
         loadCategoryData(dataFilePath);
-        printCategory();
         categoryEmpty = FALSE;
     }
 

@@ -181,7 +181,8 @@ void deleteItemWidget(GtkWidget *widget, gpointer userdata)
         int response = warningManager(mainWindow, GTK_BUTTONS_YES_NO, GTK_MESSAGE_QUESTION, "Do you want to delete the widget? ");
         if(response)
         {
-            gtk_widget_destroy(GTK_WIDGET(deleteingItem->box));
+            // gtk_widget_destroy(GTK_WIDGET(deleteingItem->box));
+            g_print("successfully deleted item of id: %d", deleteingItem->id);
             // deleteMenuData(deleteItem->filename, deleteItem->id);
             if(isTableEmpty(deleteingItem->filename, "menu"))
             {

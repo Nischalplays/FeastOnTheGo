@@ -232,16 +232,16 @@ void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata)
 
 GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoad)
 {
-
+    int id;
     char *imagepath = NULL;
     char *name = NULL;
     char *category = NULL;
     int price = 0;
     int discount = 0;
 
-    NewItem *itemdata = (NewItem *)user_data;
     if(action == ACTION_SAVE)
     {
+        NewItem *itemdata = (NewItem *)user_data;
         imagepath = strdup(itemdata->imagePath);
         name = strdup(itemdata->name);
         category = strdup(itemdata->category);
@@ -251,11 +251,13 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     }
     else if(action == ACTION_LOAD)
     {
-        imagepath = strdup(product->ImageFile);
-        name = strdup(product->name);
-        category = strdup(product->category);
-        price = product->price;
-        discount = product->discount;
+        Products *currentProduct = (Products *)user_data;
+        id = currentProduct->id;
+        imagepath = g_strdup(currentProduct->ImageFile);
+        name = g_strdup(currentProduct->name);
+        category = g_strdup(currentProduct->category);
+        price = currentProduct->price;
+        discount = currentProduct->discount;
     }
 
 
@@ -292,8 +294,17 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     gtk_widget_set_size_request(GTK_WIDGET(imageHolder), 200, 200);
     gtk_widget_set_name(GTK_WIDGET(imageHolder), "newItemImage2");
     gtk_widget_set_halign(GTK_WIDGET(imageHolder), GTK_ALIGN_CENTER);
+
+    GtkWidget *itemImage;
     
-    GtkWidget *itemImage = createRoundedImage(imagepath, 200, 200, 20);
+    if(g_file_test(imagepath, G_FILE_TEST_EXISTS))
+    {
+        itemImage = createRoundedImage(imagepath, 200, 200, 20);
+    }
+    else 
+    {
+        itemImage = createRoundedImage(addItemDefaultImage, 200, 200, 20);
+    }
     
     char *itemNameText = g_strdup_printf("Name: %s.", name);
     GtkWidget *itemName = gtk_label_new(itemNameText);
@@ -313,7 +324,7 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
 
-    // deleteItem->id = product->id;
+    deleteItem->id = id;
     deleteItem->box = itemBox; 
     deleteItem->products = product;
     deleteItem->filename = dataFilePath;
@@ -402,11 +413,6 @@ void on_submit(GtkButton *current_button, gpointer user_data)
         }
         data->category = strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->comboBox)));
 
-        GtkWidget *boxToLoad = searchCategoryContainer(data->category);
-        GtkWidget *vbox = create_box(data, ACTION_SAVE, boxToLoad);
-        gtk_box_pack_start(GTK_BOX(data->destinationBox), vbox, FALSE, FALSE, 0);
-
-        gtk_widget_show_all(GTK_WIDGET(vbox));
         success = 1;
     }
     else
@@ -416,39 +422,48 @@ void on_submit(GtkButton *current_button, gpointer user_data)
             warningManager(data->addItemWindow, GTK_BUTTONS_OK, GTK_MESSAGE_ERROR,"Please fill all the details");
         }
     }
-    printf("current category: %s\n", data->category);
 
     if (success)
     {
 
-        // addProduct(NULL, data->imagePath, data->name, data->price, data->discount);
-        // product[productCount].ImageFile = strdup(data->imagePath);
-        // product[productCount].name = strdup(data->name);
-        // product[productCount].price = data->price;
-        // product[productCount].discount = data->discount;
         saveMenuData(data, dataFilePath);
+        printf("category Name: %s\n", data->category);
+        GtkWidget *boxToLoad = searchCategoryContainer(data->category);
+        GtkWidget *vBox = create_box(data, ACTION_SAVE, boxToLoad);
+        if(boxToLoad)
+        {
+            gtk_box_pack_start(GTK_BOX(boxToLoad), vBox, FALSE, FALSE, 0);
+        }
+        else
+        {
+            printf("failed to find the box to load.");
+        }
+        gtk_widget_show_all(vBox);
 
-        // data->imagePath = NULL;
-        // gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(data->imageEntry), "");
-        // data->name = NULL;
-        // data->price = 0;
-        // data->discount = 0;
-        // gtk_entry_set_text(GTK_ENTRY(data->nameField), "");
-        // gtk_entry_set_text(GTK_ENTRY(data->priceField), "");
-        // gtk_entry_set_text(GTK_ENTRY(data->discountField), "");
+        data->imagePath = NULL;
+        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(data->imageEntry), "");
+        data->name = NULL;
+        data->price = 0;
+        data->discount = 0;
+        data->category = NULL;
+        gtk_entry_set_text(GTK_ENTRY(data->nameField), "");
+        gtk_entry_set_text(GTK_ENTRY(data->priceField), "");
+        gtk_entry_set_text(GTK_ENTRY(data->discountField), "");
+        gtk_combo_box_set_active(GTK_COMBO_BOX(data->comboBox), 0);
     }
 }
 
 GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
 {
-    Products *product = (Products *)user_data;
+    Products *currentProduct = (Products *)user_data;
+    // Delete *deleteWidget = g_new(Delete, 1);
     Delete *deleteWidget = malloc(sizeof(Delete));
-
+    
     GtkWidget *itemBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(GTK_WIDGET(itemBox), 300, 300);
     gtk_widget_set_name(GTK_WIDGET(itemBox), "newBox");
     gtk_widget_set_margin_start(GTK_WIDGET(itemBox), 10);
-
+    
     GtkWidget *stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_transition_duration(GTK_STACK(stack), 300);
@@ -468,22 +483,22 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     gtk_widget_set_name(GTK_WIDGET(imageHolder), "newItemImage2");
     gtk_widget_set_halign(GTK_WIDGET(imageHolder), GTK_ALIGN_CENTER);
     
-    GtkWidget *itemImage = createRoundedImage(product->ImageFile, 200, 200, 20);
+    GtkWidget *itemImage = createRoundedImage(currentProduct->ImageFile, 200, 200, 20);
     
-    char *itemNameText = g_strdup_printf("Name: %s.", product->name);
+    char *itemNameText = g_strdup_printf("Name: %s.", currentProduct->name);
     GtkWidget *itemName = gtk_label_new(itemNameText);
     g_free(itemNameText);
     
-    char *itemPriceText = g_strdup_printf("Price: %d.", product->price);
+    char *itemPriceText = g_strdup_printf("Price: %d.", currentProduct->price);
     GtkWidget *itemPrice = gtk_label_new(itemPriceText);
     g_free(itemPriceText);
     
     gtk_box_pack_start(GTK_BOX(imageHolder), itemImage, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemName, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemPrice, FALSE, FALSE, 0);
-
+    
     GtkWidget *optionContainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-
+    
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
@@ -497,17 +512,12 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     GtkWidget *emptyGrid3 = gtk_label_new("");
     gtk_widget_set_size_request(GTK_WIDGET(emptyGrid3), 75, -1);
     
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid1), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid2), "try");
-    // gtk_widget_set_name(GTK_WIDGET(emptyGrid3), "try");
-
-    deleteWidget->id = product->id;
+    deleteWidget->id = currentProduct->id;
     deleteWidget->box = itemBox; 
-    deleteWidget->products = product;
+    deleteWidget->products = currentProduct;
     deleteWidget->filename = dataFilePath;
     deleteWidget->boxContainer = boxToLoad;
-
+    
     
     GtkWidget *addToCartButton = gtk_button_new_with_label("Add To Cart");
     gtk_widget_set_name(GTK_WIDGET(addToCartButton), "optionButton");
