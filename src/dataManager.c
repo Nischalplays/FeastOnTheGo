@@ -154,6 +154,51 @@ int saveMenuData(NewItem *data, const char *filename)
     return SQLITE_OK;
 }
 
+int updateMenuData(const char *filename, gpointer user_data)
+{
+    UpdateItem *itemDetails = (UpdateItem *)user_data;
+    
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_open(filename, &db);
+    if (rc)  // <- if error
+    {
+        g_print("Failed to open the database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return rc;
+    }
+        
+    const char *sql = "UPDATE menu SET name = ?, price = ?, discount = ?, image_path = ?, category = ? WHERE id = ?";
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK)
+    {
+        g_print("Failed to prepare the statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return rc;
+    }
+
+    sqlite3_bind_text(stmt, 1, itemDetails->name, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, itemDetails->price);
+    sqlite3_bind_int(stmt, 3, itemDetails->discount);
+    sqlite3_bind_text(stmt, 4, itemDetails->imagePath, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, itemDetails->category, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 6, itemDetails->id);
+
+    if (sqlite3_step(stmt) != SQLITE_DONE) 
+    {
+        g_print("SQL ERROR: %s\n", sqlite3_errmsg(db));
+    }
+    else 
+    {
+        g_print("Menu item updated successfully.\n");
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    return SQLITE_OK;
+}
+
+
 int saveCategoryData(NewCategory *data, char *filename)
 {
     sqlite3 *database;
@@ -315,6 +360,8 @@ int deleteMenuData(const char *filename, int id)
     sqlite3_close(db);
     return 0;
 }
+
+
 
 void printMenuData(Products *product, int size)
 {

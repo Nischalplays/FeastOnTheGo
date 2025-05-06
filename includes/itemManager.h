@@ -10,7 +10,8 @@ extern GtkWidget *defaultLoadBox;
 extern char *dataFilePath;
 extern char *addItemDefaultImage;
 
-void addItemToBox(GtkButton *button, gpointer user_data);
+void createItemBox(GtkWidget *button, gpointer user_data);
+void addItemToBox(GtkButton *button, gpointer user_data, DataAction action);
 void on_file_set(GtkFileChooserButton *filebutton, gpointer userdata);
 GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoad);
 void updata_image(char *newImagePath, gpointer user_data);

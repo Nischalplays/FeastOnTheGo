@@ -11,7 +11,6 @@ typedef struct
     int response;
 } DialogResponse;
 
-
 GtkWidget *createBox_with_text(int boxWidth, int boxHeight, const char *text, GtkOrientation orientation, const char *widgetName);
 GtkWidget *createButton_with_text(int boxWidth, int boxHeight, const char *text);
 GtkWidget *createCategoryWindow();

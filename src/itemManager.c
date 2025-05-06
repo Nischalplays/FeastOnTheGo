@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <windows.h>
 #include <gtk/gtk.h>
 #include "main.h"
@@ -7,27 +8,37 @@
 #include "dataManager.h"
 #include "widgetManager.h"
 #include "structManager.h"
+#include "utils.h"
 
 char *dataFilePath = "../src/data/FeastOnTheGo.db";
 char *addItemTempImage;
 int noOfProduct = 0;
 char *addItemDefaultImage = "../src/img/addItemDefaultImage.jpg";
 GtkWidget *defaultLoadBox;
+GtkWidget *new_Item_Window;
 
-void addItemToBox(GtkButton *button, gpointer user_data)
+void createItemBox(GtkWidget *button, gpointer user_data)
 {
-    item.imagePath = NULL;
-    item.name = NULL;
-    item.price = 0;
-    item.discount = 0;
-    item.destinationBox = user_data;
+    if (user_data != NULL)
+    {
+        UpdateItem *toUpdate = (UpdateItem *)user_data;
+        addItemToBox(GTK_BUTTON(button), toUpdate, ACTION_UPDATE);
+    }
+    else
+    {
+        addItemToBox(GTK_BUTTON(button), NULL, ACTION_SAVE);
+    }
+}
+
+void addItemToBox(GtkButton *button, gpointer user_data, DataAction action)
+{
+
+    UpdateItem *newDetails = (UpdateItem *)user_data;
 
     const int current_window_width = 500;
     const int current_window_height = 500;
 
-    GtkWidget *currentBox = GTK_WIDGET(user_data);
-
-    GtkWidget *new_Item_Window;
+    // GtkWidget *new_Item_Window;
 
     GtkWidget *grid;
     GtkWidget *inputGrid;
@@ -66,12 +77,17 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     gtk_window_set_resizable(GTK_WINDOW(new_Item_Window), FALSE);
     g_signal_connect(new_Item_Window, "delete-event", G_CALLBACK(gtk_widget_destroy), NULL);
 
-    item.addItemWindow = new_Item_Window;
-
     container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(new_Item_Window), container);
 
-    firstText = gtk_label_new("New Item");
+    if (action == 0)
+    {
+        firstText = gtk_label_new("New Item");
+    }
+    else if (action == 2)
+    {
+        firstText = gtk_label_new("Edit Item");
+    }
     gtk_widget_set_halign(GTK_WIDGET(firstText), GTK_ALIGN_CENTER);
     gtk_widget_set_size_request(GTK_WIDGET(firstText), -1, 50);
     gtk_box_pack_start(GTK_BOX(container), firstText, FALSE, FALSE, 0);
@@ -144,34 +160,48 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     nameText = gtk_label_new("Name:");
     gtk_widget_set_name(GTK_WIDGET(nameText), "input_text");
     nameEntry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(nameEntry), "Food Name");
-    gtk_widget_set_name(GTK_WIDGET(nameEntry), "entryBox");
 
     priceText = gtk_label_new("Price: ");
     gtk_widget_set_name(GTK_WIDGET(priceText), "input_text");
-    priceEntry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(priceEntry), "Food Price");
-    gtk_widget_set_name(GTK_WIDGET(priceEntry), "entryBox");
 
     discountText = gtk_label_new("Discount: ");
     gtk_widget_set_name(GTK_WIDGET(discountText), "input_text");
-    discountEntry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(discountEntry), "Discount");
-    gtk_widget_set_name(GTK_WIDGET(discountEntry), "entryBox");
-
-    offerText = gtk_label_new("Offer:");
-    gtk_widget_set_name(GTK_WIDGET(offerText), "input_text");
-    offerEntry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(offerEntry), "offer");
-    gtk_widget_set_name(GTK_WIDGET(offerEntry), "entryBox");
 
     categoryText = gtk_label_new("Category: ");
     gtk_widget_set_name(GTK_WIDGET(categoryText), "input_text");
 
+    priceEntry = gtk_entry_new();
+    discountEntry = gtk_entry_new();
+    
     combo = gtk_combo_box_text_new();
     gtk_widget_set_name(GTK_WIDGET(combo), "entryBox");
-
     categoryOption(GTK_COMBO_BOX_TEXT(combo));
+
+    if(action == ACTION_SAVE)
+    {
+        gtk_entry_set_placeholder_text(GTK_ENTRY(nameEntry), "Food Name");
+        gtk_entry_set_placeholder_text(GTK_ENTRY(priceEntry), "Food Price");
+        gtk_entry_set_placeholder_text(GTK_ENTRY(discountEntry), "Discount");
+    }
+    else if(action == ACTION_UPDATE)
+    {
+        gtk_entry_set_text(GTK_ENTRY(nameEntry), newDetails->name);
+        gtk_entry_set_text(GTK_ENTRY(priceEntry), int_to_string(newDetails->price));
+        gtk_entry_set_text(GTK_ENTRY(discountEntry), int_to_string(newDetails->discount));
+    }
+
+    gtk_widget_set_name(GTK_WIDGET(nameEntry), "entryBox");
+    gtk_widget_set_name(GTK_WIDGET(priceEntry), "entryBox");
+    gtk_widget_set_name(GTK_WIDGET(discountEntry), "entryBox");
+
+
+//Maybe need later
+    // offerText = gtk_label_new("Offer:");
+    // gtk_widget_set_name(GTK_WIDGET(offerText), "input_text");
+    // offerEntry = gtk_entry_new();
+    // gtk_entry_set_placeholder_text(GTK_ENTRY(offerEntry), "offer");
+    // gtk_widget_set_name(GTK_WIDGET(offerEntry), "entryBox");
+
 
     gtk_grid_attach(GTK_GRID(inputGrid), nameText, 0, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(inputGrid), nameEntry, 1, 0, 1, 1);
@@ -202,12 +232,31 @@ void addItemToBox(GtkButton *button, gpointer user_data)
     item.discountField = discountEntry;
     item.comboBox = combo;
 
-    addButton = gtk_button_new_with_label("Add Item");
+    newDetails->nameField = nameEntry;
+    newDetails->priceField = priceEntry;
+    newDetails->discountField = discountEntry;
+    newDetails->comboBox = combo;
+
+    if(action ==ACTION_SAVE)
+    {
+        addButton = gtk_button_new_with_label("Add Item");
+    }
+    else if(action == ACTION_UPDATE)
+    {
+        addButton = gtk_button_new_with_label("Update Item");
+    }
     gtk_button_set_relief(GTK_BUTTON(addButton), GTK_RELIEF_NONE);
     gtk_box_pack_start(GTK_BOX(addButtonContainer1), addButton, TRUE, TRUE, 0);
     gtk_widget_set_name(GTK_WIDGET(addButton), "submitButton");
 
-    g_signal_connect(addButton, "clicked", G_CALLBACK(on_submit), &item);
+    if(action == ACTION_SAVE)
+    {
+        g_signal_connect(addButton, "clicked", G_CALLBACK(on_submit), &item);
+    }
+    else if(action == ACTION_UPDATE)
+    {
+        g_signal_connect(addButton, "clicked", G_CALLBACK(on_submit), newDetails);
+    }
 
     gtk_widget_show_all(GTK_WIDGET(new_Item_Window));
 }
@@ -239,7 +288,7 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     int price = 0;
     int discount = 0;
 
-    if(action == ACTION_SAVE)
+    if (action == ACTION_SAVE)
     {
         NewItem *itemdata = (NewItem *)user_data;
         imagepath = strdup(itemdata->imagePath);
@@ -247,9 +296,8 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
         category = strdup(itemdata->category);
         price = itemdata->price;
         discount = itemdata->discount;
-
     }
-    else if(action == ACTION_LOAD)
+    else if (action == ACTION_LOAD)
     {
         Products *currentProduct = (Products *)user_data;
         id = currentProduct->id;
@@ -260,16 +308,20 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
         discount = currentProduct->discount;
     }
 
-
     deleteItem = malloc(sizeof(Delete));
-    if(!deleteItem)
+    if (!deleteItem)
     {
-        printf("failed allocating memory");
+        printf("failed allocating memory\n");
+        return NULL;
+    }
+
+    updatedItem = malloc(sizeof(UpdateItem));
+    if (!updatedItem)
+    {
+        printf("failed to allocated memory\n");
         return NULL;
     }
     // const char *destinationBoxNam = gtk_widget_get_name(GTK_WIDGET(itemdata->destinationBox));
-
-    
 
     GtkWidget *itemBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(GTK_WIDGET(itemBox), 300, 300);
@@ -279,41 +331,41 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     GtkWidget *stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_transition_duration(GTK_STACK(stack), 300);
-    
+
     GtkWidget *viewcontainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     // gtk_box_pack_start(GTK_BOX(box), viewcontainer, TRUE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(viewcontainer), 300, 300);
-    
+
     GtkWidget *imageContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), imageContainer, FALSE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(imageContainer), 300, 200);
     gtk_widget_set_margin_top(GTK_WIDGET(imageContainer), 10);
-    
-    GtkWidget * imageHolder = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    GtkWidget *imageHolder = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start(GTK_BOX(imageContainer), imageHolder, TRUE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(imageHolder), 200, 200);
     gtk_widget_set_name(GTK_WIDGET(imageHolder), "newItemImage2");
     gtk_widget_set_halign(GTK_WIDGET(imageHolder), GTK_ALIGN_CENTER);
 
     GtkWidget *itemImage;
-    
-    if(g_file_test(imagepath, G_FILE_TEST_EXISTS))
+
+    if (g_file_test(imagepath, G_FILE_TEST_EXISTS))
     {
         itemImage = createRoundedImage(imagepath, 200, 200, 20);
     }
-    else 
+    else
     {
         itemImage = createRoundedImage(addItemDefaultImage, 200, 200, 20);
     }
-    
+
     char *itemNameText = g_strdup_printf("Name: %s.", name);
     GtkWidget *itemName = gtk_label_new(itemNameText);
     g_free(itemNameText);
-    
+
     char *itemPriceText = g_strdup_printf("Price: %d.", price);
     GtkWidget *itemPrice = gtk_label_new(itemPriceText);
     g_free(itemPriceText);
-    
+
     gtk_box_pack_start(GTK_BOX(imageHolder), itemImage, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemName, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemPrice, FALSE, FALSE, 0);
@@ -325,12 +377,18 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
 
     deleteItem->id = id;
-    deleteItem->box = itemBox; 
+    deleteItem->box = itemBox;
     deleteItem->products = product;
     deleteItem->filename = dataFilePath;
     deleteItem->boxContainer = boxToLoad;
-    
-    
+
+    updatedItem->id = id;
+    updatedItem->containerToUpdate = itemBox;
+    updatedItem->name = name;
+    updatedItem->price = price;
+    updatedItem->discount = discount;
+    updatedItem->imagePath = imagepath;
+
     GtkWidget *addToCartButton = gtk_button_new_with_label("Add To Cart");
     gtk_widget_set_name(GTK_WIDGET(addToCartButton), "optionButton");
     gtk_widget_set_margin_top(addToCartButton, 10);
@@ -342,33 +400,34 @@ GtkWidget *create_box(gpointer user_data, DataAction action, GtkWidget *boxToLoa
     gtk_widget_set_name(editMenButton, "editButton");
     gtk_widget_set_hexpand(editMenButton, TRUE);
     gtk_widget_set_halign(editMenButton, GTK_ALIGN_CENTER);
+    g_signal_connect(editMenButton, "clicked", G_CALLBACK(createItemBox), updatedItem);
 
     GtkWidget *deleteItemButton = gtk_button_new_with_label("Delete");
     gtk_widget_set_name(GTK_WIDGET(deleteItemButton), "deleteButton");
     gtk_widget_set_hexpand(deleteItemButton, TRUE);
     gtk_widget_set_halign(deleteItemButton, GTK_ALIGN_CENTER);
     g_signal_connect(deleteItemButton, "clicked", G_CALLBACK(deleteItemWidget), deleteItem);
-    
+
     gtk_grid_attach(GTK_GRID(grid), addToCartButton, 1, 0, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), editMenButton, 1, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), deleteItemButton, 1, 2, 1, 1);
-    
+
     gtk_box_pack_start(GTK_BOX(optionContainer), grid, FALSE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(grid), 300, 300);
     gtk_widget_set_size_request(GTK_WIDGET(optionContainer), 300, 300);
-    
-    gtk_stack_add_named(GTK_STACK(stack), viewcontainer, "view"); 
-    gtk_stack_add_named(GTK_STACK(stack), optionContainer, "option"); 
-    
-    GtkWidget * event_box = gtk_event_box_new();
+
+    gtk_stack_add_named(GTK_STACK(stack), viewcontainer, "view");
+    gtk_stack_add_named(GTK_STACK(stack), optionContainer, "option");
+
+    GtkWidget *event_box = gtk_event_box_new();
     gtk_container_add(GTK_CONTAINER(event_box), stack);
     gtk_widget_set_size_request(GTK_WIDGET(event_box), 300, 300);
-    
+
     g_signal_connect(event_box, "enter-notify-event", G_CALLBACK(onHover), stack);
     g_signal_connect(event_box, "leave-notify-event", G_CALLBACK(onLeave), stack);
     
     gtk_box_pack_start(GTK_BOX(itemBox), event_box, TRUE, TRUE, 0);
-    
+
     return itemBox;
 }
 
@@ -384,72 +443,103 @@ void updata_image(char *newImagePath, gpointer user_data)
 
 void on_submit(GtkButton *current_button, gpointer user_data)
 {
+    NewItem *data = NULL;
+    UpdateItem *currentData = NULL;
 
-    NewItem *data = (NewItem *)user_data;
     int success = 0;
+    gboolean isUpdate = FALSE;
 
-    const char *lastNameEntry = gtk_entry_get_text(GTK_ENTRY(data->nameField));
-    const char *lastPriceEntry = gtk_entry_get_text(GTK_ENTRY(data->priceField));
-    const char *lastDiscountEntry = gtk_entry_get_text(GTK_ENTRY(data->discountField));
+    const char *buttonText = gtk_button_get_label(current_button);
+    const char *lastImagePath = NULL;
+    const char *lastNameEntry = NULL;
+    const char *lastPriceEntry = NULL;
+    const char *lastDiscountEntry = NULL;
 
-    if (lastNameEntry != NULL && strlen(lastNameEntry) != 0 && lastPriceEntry != NULL && strlen(lastPriceEntry) != 0 && data->imagePath != NULL)
+    const char *imagePath = NULL;
+    const char *name = NULL;
+    int price = 0;
+    int discount = 0;
+    
+    if(strcmp(buttonText, "Add Item") == 0)
     {
+        NewItem *data = (NewItem *)user_data;
+        lastImagePath = data->imagePath;
+        lastNameEntry = gtk_entry_get_text(GTK_ENTRY(data->nameField));
+        lastPriceEntry = gtk_entry_get_text(GTK_ENTRY(data->priceField));
+        lastDiscountEntry = gtk_entry_get_text(GTK_ENTRY(data->discountField));
+    }
+    else if(strcmp(buttonText, "Update Item") == 0)
+    {
+        UpdateItem *currentData = (UpdateItem *)user_data;
+        isUpdate = TRUE;
 
-        data->name = strdup(gtk_entry_get_text(GTK_ENTRY(data->nameField)));
-        data->price = atoi(gtk_entry_get_text(GTK_ENTRY(data->priceField)));
-        if (lastDiscountEntry != NULL)
-        {
-            data->discount = atoi(gtk_entry_get_text(GTK_ENTRY(data->discountField)));
-        }
-        else
-        {
-            data->discount = 0;
-        }
+        lastImagePath = currentData->imagePath;
+        lastNameEntry = gtk_entry_get_text(GTK_ENTRY(currentData->nameField));
+        lastPriceEntry = gtk_entry_get_text(GTK_ENTRY(currentData->priceField));
+        lastDiscountEntry = gtk_entry_get_text(GTK_ENTRY(currentData->discountField));
+    }
 
-        if (emptyBox != NULL)
-        {
-            gtk_widget_destroy(GTK_WIDGET(emptyBox));
-            emptyBox = NULL;
-        }
-        data->category = strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(data->comboBox)));
+    name = g_strdup(lastNameEntry);
+    price = atoi(lastPriceEntry);
+    discount = atoi(lastDiscountEntry);
+
+
+
+    if(validateItem(lastImagePath, lastNameEntry, lastPriceEntry) != FALSE)
+    {
 
         success = 1;
     }
     else
     {
-        if (data->addItemWindow != NULL)
+        if (new_Item_Window != NULL)
         {
-            warningManager(data->addItemWindow, GTK_BUTTONS_OK, GTK_MESSAGE_ERROR,"Please fill all the details");
+            warningManager(new_Item_Window, GTK_BUTTONS_OK, GTK_MESSAGE_ERROR, "Please fill all the details");
         }
     }
 
     if (success)
     {
-
-        saveMenuData(data, dataFilePath);
-        printf("category Name: %s\n", data->category);
-        GtkWidget *boxToLoad = searchCategoryContainer(data->category);
-        GtkWidget *vBox = create_box(data, ACTION_SAVE, boxToLoad);
-        if(boxToLoad)
+        if(isUpdate)
         {
-            gtk_box_pack_start(GTK_BOX(boxToLoad), vBox, FALSE, FALSE, 0);
+            currentData->name = g_strdup(name);
+            currentData->price = price;
+            currentData->discount = discount;
+            currentData->category = g_strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX(currentData->comboBox)));
+
+            updateMenuData(dataFilePath, currentData);
         }
         else
         {
-            printf("failed to find the box to load.");
-        }
-        gtk_widget_show_all(vBox);
+            data->name = g_strdup(name);
+            data->price = price;
+            data->discount = discount;
+            data->category = g_strdup(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX(data->comboBox)));
 
-        data->imagePath = NULL;
-        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(data->imageEntry), "");
-        data->name = NULL;
-        data->price = 0;
-        data->discount = 0;
-        data->category = NULL;
-        gtk_entry_set_text(GTK_ENTRY(data->nameField), "");
-        gtk_entry_set_text(GTK_ENTRY(data->priceField), "");
-        gtk_entry_set_text(GTK_ENTRY(data->discountField), "");
-        gtk_combo_box_set_active(GTK_COMBO_BOX(data->comboBox), 0);
+            saveMenuData(data, dataFilePath);
+
+            if(emptyBox != NULL)
+            {
+                gtk_widget_destroy(emptyBox);
+                emptyBox = NULL;
+            }
+
+            GtkWidget *boxToLoad = searchCategoryContainer(data->category);
+            GtkWidget *vBox = create_box(data, ACTION_SAVE, boxToLoad);
+            if(boxToLoad)
+            {
+                gtk_box_pack_start(GTK_BOX(boxToLoad), vBox, FALSE, FALSE, 0);
+            }
+            gtk_widget_show_all(vBox);
+
+            data->imagePath = NULL;
+            gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(data->imageEntry), "");
+            gtk_entry_set_text(GTK_ENTRY(data->nameField), "");
+            gtk_entry_set_text(GTK_ENTRY(data->priceField), "");
+            gtk_entry_set_text(GTK_ENTRY(data->discountField), "");
+            gtk_combo_box_set_active(GTK_COMBO_BOX(data->comboBox), 0);
+        }
+        g_free((gpointer)name);
     }
 }
 
@@ -458,51 +548,51 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     Products *currentProduct = (Products *)user_data;
     // Delete *deleteWidget = g_new(Delete, 1);
     Delete *deleteWidget = malloc(sizeof(Delete));
-    
+
     GtkWidget *itemBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_widget_set_size_request(GTK_WIDGET(itemBox), 300, 300);
     gtk_widget_set_name(GTK_WIDGET(itemBox), "newBox");
     gtk_widget_set_margin_start(GTK_WIDGET(itemBox), 10);
-    
+
     GtkWidget *stack = gtk_stack_new();
     gtk_stack_set_transition_type(GTK_STACK(stack), GTK_STACK_TRANSITION_TYPE_CROSSFADE);
     gtk_stack_set_transition_duration(GTK_STACK(stack), 300);
-    
+
     GtkWidget *viewcontainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     // gtk_box_pack_start(GTK_BOX(box), viewcontainer, TRUE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(viewcontainer), 300, 300);
-    
+
     GtkWidget *imageContainer = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), imageContainer, FALSE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(imageContainer), 300, 200);
     gtk_widget_set_margin_top(GTK_WIDGET(imageContainer), 10);
-    
-    GtkWidget * imageHolder = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+    GtkWidget *imageHolder = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start(GTK_BOX(imageContainer), imageHolder, TRUE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(imageHolder), 200, 200);
     gtk_widget_set_name(GTK_WIDGET(imageHolder), "newItemImage2");
     gtk_widget_set_halign(GTK_WIDGET(imageHolder), GTK_ALIGN_CENTER);
-    
+
     GtkWidget *itemImage = createRoundedImage(currentProduct->ImageFile, 200, 200, 20);
-    
+
     char *itemNameText = g_strdup_printf("Name: %s.", currentProduct->name);
     GtkWidget *itemName = gtk_label_new(itemNameText);
     g_free(itemNameText);
-    
+
     char *itemPriceText = g_strdup_printf("Price: %d.", currentProduct->price);
     GtkWidget *itemPrice = gtk_label_new(itemPriceText);
     g_free(itemPriceText);
-    
+
     gtk_box_pack_start(GTK_BOX(imageHolder), itemImage, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemName, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(viewcontainer), itemPrice, FALSE, FALSE, 0);
-    
+
     GtkWidget *optionContainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    
+
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_column_spacing(GTK_GRID(grid), 5);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
-    
+
     GtkWidget *emptyGrid = gtk_label_new("");
     gtk_widget_set_size_request(GTK_WIDGET(emptyGrid), 75, -1);
     GtkWidget *emptyGrid1 = gtk_label_new("");
@@ -511,20 +601,19 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     gtk_widget_set_size_request(GTK_WIDGET(emptyGrid2), 75, -1);
     GtkWidget *emptyGrid3 = gtk_label_new("");
     gtk_widget_set_size_request(GTK_WIDGET(emptyGrid3), 75, -1);
-    
+
     deleteWidget->id = currentProduct->id;
-    deleteWidget->box = itemBox; 
+    deleteWidget->box = itemBox;
     deleteWidget->products = currentProduct;
     deleteWidget->filename = dataFilePath;
     deleteWidget->boxContainer = boxToLoad;
-    
-    
+
     GtkWidget *addToCartButton = gtk_button_new_with_label("Add To Cart");
     gtk_widget_set_name(GTK_WIDGET(addToCartButton), "optionButton");
     GtkWidget *deleteItemButton = gtk_button_new_with_label("Delete");
     gtk_widget_set_name(GTK_WIDGET(deleteItemButton), "deleteButton");
     g_signal_connect(deleteItemButton, "clicked", G_CALLBACK(deleteItemWidget), deleteWidget);
-    
+
     gtk_grid_attach(GTK_GRID(grid), emptyGrid, 0, 0, 3, 1);
     gtk_grid_attach(GTK_GRID(grid), emptyGrid1, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), addToCartButton, 1, 1, 1, 1);
@@ -532,15 +621,15 @@ GtkWidget *load_box(GtkWidget *boxToLoad, gpointer user_data)
     gtk_grid_attach(GTK_GRID(grid), emptyGrid2, 0, 2, 3, 1);
     gtk_grid_attach(GTK_GRID(grid), emptyGrid3, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), deleteItemButton, 1, 3, 1, 1);
-    
+
     gtk_box_pack_start(GTK_BOX(optionContainer), grid, FALSE, FALSE, 0);
     gtk_widget_set_size_request(GTK_WIDGET(grid), 300, 300);
     gtk_widget_set_size_request(GTK_WIDGET(optionContainer), 300, 300);
 
-    gtk_stack_add_named(GTK_STACK(stack), viewcontainer, "view"); 
-    gtk_stack_add_named(GTK_STACK(stack), optionContainer, "option"); 
+    gtk_stack_add_named(GTK_STACK(stack), viewcontainer, "view");
+    gtk_stack_add_named(GTK_STACK(stack), optionContainer, "option");
 
-    GtkWidget * event_box = gtk_event_box_new();
+    GtkWidget *event_box = gtk_event_box_new();
     gtk_container_add(GTK_CONTAINER(event_box), stack);
     gtk_widget_set_size_request(GTK_WIDGET(event_box), 300, 300);
 
@@ -558,7 +647,7 @@ void loadItemBox(Products *product)
     {
         GtkWidget *boxToLoad = searchCategoryContainer(product[i].category);
         GtkWidget *vbox = create_box(&product[i], ACTION_LOAD, boxToLoad);
-        if(boxToLoad)
+        if (boxToLoad)
         {
             gtk_box_pack_start(GTK_BOX(boxToLoad), vbox, FALSE, FALSE, 0);
         }

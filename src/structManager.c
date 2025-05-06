@@ -16,6 +16,8 @@ NewItem item;
 NewCategory category;
 Delete *deleteItem;
 
+UpdateItem *updatedItem;
+
 void addProduct(int id, const char *ImagePath,const char *name, int price, int discount, const char *category)
 {
     if(productCount == productCapacity)

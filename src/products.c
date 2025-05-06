@@ -1,9 +1,10 @@
 #include <gtk/gtk.h>
+#include <stdio.h>
 #include "main.h"
 #include "products.h"
 #include "widgetManager.h"
 #include "dataManager.h"
-#include <stdio.h>
+#include "itemManager.h"
 
 GtkWidget *categoryTopContainer;
 int categoryEmpty = TRUE;
@@ -93,7 +94,7 @@ GtkWidget *createProductPage()
     GtkWidget *AddProductButton = createButton_with_text(-1, 50, "Add Product");
     gtk_box_pack_start(GTK_BOX(foodItemContainer), AddProductButton, FALSE, FALSE, 0);
     gtk_widget_set_name(AddProductButton, "addCategory");
-    g_signal_connect(AddProductButton, "clicked", G_CALLBACK(addItemToBox), NULL);
+    g_signal_connect(AddProductButton, "clicked", G_CALLBACK(createItemBox), NULL);
 
     foodItemBox = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(foodItemBox), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);

@@ -7,6 +7,7 @@
 extern int noOfDataInDB;
 
 int saveMenuData(NewItem *data, const char *filename);
+int updateMenuData(const char *filename, gpointer user_data);
 int saveCategoryData(NewCategory *data, char *filename);
 int isTableEmpty(const char *filename, const char *tableName);
 int loadMenuData(const char *filename);
